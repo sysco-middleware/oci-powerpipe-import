@@ -27,7 +27,7 @@ func main() {
 
 	log.Printf("id is %d \n", id)
 
-	records, err := parseCsv("/Users/prakhar/dashboards/oci_compliance.benchmark.cis_v200.20240708T150811.csv", id)
+	records, err := parseCsv("/Users/prakhar/workspace/toyota/oci-powerpipe-import/oci_compliance.benchmark.cis_v200.20240705T134927.csv", id)
 	if err != nil {
 		log.Fatalf("msg: error.parsing.csv , err : %v \n", err)
 	}
