@@ -5,29 +5,28 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"os"
 )
 
 const (
 	// host will change on cloud run to /cloudsql/connection_name
-	connStr       = "user=%s password=%s database=%s host=%s sslmode=disable port=%s"
-	dbHost        = "PG_DB_HOST"
-	dbUserKey     = "PG_DB_USER"
-	dbPassKey     = "PG_DB_PASS"
-	dbPortKey     = "PG_DB_PORT"
-	dbDatabaseKey = "PG_DB_SCHEMA"
+	connStr       = "user=%s password=%s database=%s host=%s sslmode=disable port=%d"
+	dbHost        = "host"
+	dbUserKey     = "user"
+	dbPassKey     = "pass"
+	dbPortKey     = "port"
+	dbDatabaseKey = "schema"
 )
 
-var errMissingEnvProps = errors.New("missing environment variables")
+var errMissingEnvProps = errors.New("invalid.db.properties")
 
 type Service struct {
 	db *sqlx.DB
 }
 
-func New() (*Service, string, error) {
+func New(user, pass, database, host string, port int) (*Service, string, error) {
 	s := new(Service)
 
-	conn, field, err := prepareConnString()
+	conn, field, err := prepareConnString(user, pass, database, host, port)
 	if err != nil {
 		return nil, field, err
 	}
@@ -45,29 +44,20 @@ func New() (*Service, string, error) {
 	return s, "", nil
 }
 
-func prepareConnString() (string, string, error) {
-	host := os.Getenv(dbHost)
+func prepareConnString(user, pass, database, host string, port int) (string, string, error) {
 	if host == "" {
 		return "", dbHost, errMissingEnvProps
 	}
-
-	user := os.Getenv(dbUserKey)
 	if user == "" {
 		return "", dbUserKey, errMissingEnvProps
 	}
-
-	pass := os.Getenv(dbPassKey)
 	if pass == "" {
 		return "", dbPassKey, errMissingEnvProps
 	}
-
-	database := os.Getenv(dbDatabaseKey)
 	if database == "" {
 		return "", dbDatabaseKey, errMissingEnvProps
 	}
-
-	port := os.Getenv(dbPortKey)
-	if port == "" {
+	if port == 0 {
 		return "", dbPortKey, errMissingEnvProps
 	}
 
